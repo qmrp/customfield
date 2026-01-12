@@ -32,9 +32,15 @@ class ConditionalFieldType extends AbstractFieldType
         if (!$field) {
             return false;
         }
-
-        $actual = $model->$field ?? null;
-
+        $field = explode('.', $field);
+        if(count($field) > 1){  // 处理关联字段
+            $attr = $field[0];
+            $key = $field[1];
+            $actual = $model->$attr[$key] ?? null;
+        }else{
+            $field = $field[0];
+            $actual = $model->$field ?? null;
+        }
         switch ($operator) {
             case '==':
                 return $actual == $expected;

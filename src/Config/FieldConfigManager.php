@@ -15,7 +15,6 @@ class FieldConfigManager
     public function getFieldConfig(string $module, string $key): ?array
     {
         $cacheKey = $this->getCacheKey($module, $key);
-        
         return Cache::remember($cacheKey, $this->cacheTtl, function () use ($module, $key) {
             $field = CustomModuleField::byModule($module)
                 ->where('key', $key)

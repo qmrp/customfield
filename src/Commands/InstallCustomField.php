@@ -26,7 +26,7 @@ class InstallCustomField extends Command
     {
         $this->info('Publishing migrations...');
 
-        $source = __DIR__ . '/../../database/migrations';
+        $source = __DIR__ . '/../database/migrations';
         $destination = database_path('migrations');
 
         if (!File::exists($destination)) {

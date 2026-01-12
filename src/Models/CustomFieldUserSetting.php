@@ -11,6 +11,7 @@ class CustomFieldUserSetting extends Model
     protected $fillable = [
         'module',
         'custom_module_field_id',
+        'user_id',
         'sort_order',
         'is_show',
         'is_fixed'
@@ -39,6 +40,11 @@ class CustomFieldUserSetting extends Model
 
     public function scopeVisible($query)
     {
-        return $query->where('is_show', true);
+        return $query->where('is_show', 1);
+    }
+
+    public function scopeSortOrder($query)
+    {
+        return $query->orderBy('sort_order');
     }
 }

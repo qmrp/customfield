@@ -110,6 +110,12 @@ class CustomFieldService
     {
         $fieldId = $setting['custom_module_field_id'];
 
+        // 验证字段是否存在
+        $field = CustomModuleField::where('id', $fieldId)->where('module', $module)->first();
+        if (!$field) {
+            throw new \InvalidArgumentException("Field with ID {$fieldId} not found for module {$module}");
+        }
+
         return CustomFieldUserSetting::updateOrCreate(
             [
                 'module' => $module,

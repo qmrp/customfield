@@ -40,6 +40,10 @@ abstract class AbstractFieldType implements FieldTypeInterface
     {
         if (is_callable($callback)) {
             return $callback($model, $config);
+        }else{
+            $callback = '$callback = '. $callback .';';
+            eval($callback);
+            return $callback($model, $config);
         }
         return null;
     }

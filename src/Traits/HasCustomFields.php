@@ -52,7 +52,6 @@ trait HasCustomFields
 
         $module = $this->getCustomFieldsModule();
         $fields = $this->getCustomFieldManager()->getModuleFields($module);
-
         $customFields = collect();
 
         foreach ($fields as $fieldConfig) {
@@ -109,25 +108,48 @@ trait HasCustomFields
         if (!$this->customFieldsUserId) {
             return $this->getCustomFields();
         }
-
         $module = $this->getCustomFieldsModule();
-        $visibleFields = \Qmrp\CustomField\Models\CustomFieldUserSetting::byModule($module)
+        $userSettings = \Qmrp\CustomField\Models\CustomFieldUserSetting::byModule($module)
             ->byUser($this->customFieldsUserId)
             ->visible()
-            ->pluck('custom_module_field_id')
-            ->toArray();
-
-        if (empty($visibleFields)) {
+            ->sortOrder()
+            ->get(['custom_module_field_id']);
+        
+        if ($userSettings->isEmpty()) {
             return collect();
         }
 
+        // 获取可见字段的ID列表
+        $visibleFieldIds = $userSettings->pluck('custom_module_field_id')->toArray();
+        
         $allFields = $this->getCustomFields();
         $moduleFields = $this->getCustomFieldManager()->getModuleFields($module);
-
-        return $allFields->filter(function ($value, $key) use ($moduleFields, $visibleFields) {
-            $field = collect($moduleFields)->firstWhere('key', $key);
-            return $field && in_array($field['id'], $visibleFields);
+        
+        // 创建字段ID到字段key的映射
+        $fieldIdToKey = collect($moduleFields)->keyBy('id')->map(function ($field) {
+            return $field['key'];
         });
+        
+        // 根据用户设置的排序顺序构建字段key列表
+        $sortedKeys = $userSettings->map(function ($setting) use ($fieldIdToKey) {
+            return $fieldIdToKey[$setting->custom_module_field_id] ?? null;
+        })->filter()->toArray();
+        
+        // 过滤可见字段
+        $visibleFields = $allFields->filter(function ($value, $key) use ($moduleFields, $visibleFieldIds) {
+            $field = collect($moduleFields)->firstWhere('key', $key);
+            return $field && in_array($field['id'], $visibleFieldIds);
+        });
+        
+        // 根据用户设置的顺序对可见字段进行排序
+        $sortedFields = collect();
+        foreach ($sortedKeys as $key) {
+            if ($visibleFields->has($key)) {
+                $sortedFields->put($key, $visibleFields->get($key));
+            }
+        }
+        
+        return $sortedFields;
     }
 
     protected function initializeHasCustomFields()
