@@ -67,7 +67,7 @@ $service->saveModuleFields('product', [
                     'value' => function ($model) {
                         return '未激活';
                     }
-                },
+                ],
                 [
                     'field' => 'status',
                     'operator' => '==',
@@ -75,7 +75,7 @@ $service->saveModuleFields('product', [
                     'value' => function ($model) {
                         return '草稿';
                     }
-                }
+                ],
             ]
         ],
         'sort_order' => 4,
