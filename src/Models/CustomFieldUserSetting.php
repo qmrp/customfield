@@ -20,7 +20,9 @@ class CustomFieldUserSetting extends Model
     protected $casts = [
         'sort_order' => 'integer',
         'is_show' => 'boolean',
-        'is_fixed' => 'boolean'
+        'is_fixed' => 'boolean',
+        'created_at' => 'datetime:Y-m-d H:i:s',
+        'updated_at' => 'datetime:Y-m-d H:i:s',
     ];
 
     public function field()

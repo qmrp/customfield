@@ -24,4 +24,17 @@ return [
         'prefix' => env('CUSTOMFIELD_ROUTE_PREFIX', 'api/customfield'),
         'middleware' => env('CUSTOMFIELD_ROUTE_MIDDLEWARE', 'api'),
     ],
+
+    'response' => [
+        'success' => [
+            'code' => 200,
+            'message' => 'success',
+            'data' => [],
+        ], 
+        'error' => [
+            'code' => 400,
+            'message' => 'error',
+            'data' => [],
+        ],
+    ],
 ];

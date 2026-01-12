@@ -6,7 +6,7 @@ use Qmrp\CustomField\Http\Controllers\CustomFieldController;
 Route::prefix('api/customfield')->group(function () {
     Route::get('/fields', [CustomFieldController::class, 'index']);
     Route::post('/fields', [CustomFieldController::class, 'store']);
-    Route::get('/fields/{module}/{key}', [CustomFieldController::class, 'show']);
+    Route::get('/fields/{module}', [CustomFieldController::class, 'show']);
     Route::put('/fields/{module}/{key}', [CustomFieldController::class, 'update']);
     Route::delete('/fields/{module}/{key}', [CustomFieldController::class, 'destroy']);
 

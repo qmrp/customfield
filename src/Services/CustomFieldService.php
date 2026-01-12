@@ -225,26 +225,18 @@ class CustomFieldService
 
     public function getFieldsForTable(string $module, ?int $userId = null): array
     {
-        $fields = $this->getModuleFields($module);
+        // $fields = $this->getModuleFields($module);
 
         if ($userId) {
             $userSettings = $this->getUserSettings($module, $userId);
-            $visibleFieldIds = array_column($userSettings, 'custom_module_field_id');
-            $sortOrder = [];
-
-            foreach ($userSettings as $setting) {
-                $sortOrder[$setting['custom_module_field_id']] = $setting['sort_order'];
+            foreach ($userSettings as &$setting) {
+                $setting['key'] = $setting['field']['key'];
+                $setting['name'] = $setting['field']['name'];
+                unset($setting['field']);
             }
-
-            $fields = array_filter($fields, function ($field) use ($visibleFieldIds) {
-                return in_array($field['id'], $visibleFieldIds);
-            });
-
-            usort($fields, function ($a, $b) use ($sortOrder) {
-                return ($sortOrder[$a['id']] ?? 0) <=> ($sortOrder[$b['id']] ?? 0);
-            });
+            return $userSettings;
         }
 
-        return array_values($fields);
+        return [];
     }
 }

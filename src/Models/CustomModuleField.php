@@ -23,7 +23,9 @@ class CustomModuleField extends Model
         'config' => 'array',
         'is_fixed' => 'boolean',
         'is_active' => 'boolean',
-        'sort_order' => 'integer'
+        'sort_order' => 'integer',
+        'created_at' => 'datetime:Y-m-d H:i:s',
+        'updated_at' => 'datetime:Y-m-d H:i:s',
     ];
 
     public function userSettings()

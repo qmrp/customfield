@@ -12,10 +12,15 @@ use Qmrp\CustomField\Http\Controllers\Controller as BaseController;
 class CustomFieldController extends BaseController
 {
     protected $service;
+    protected $successResponse = [];
+
+    protected $errorResponse = [];
 
     public function __construct(CustomFieldService $service)
     {
         $this->service = $service;
+        $this->successResponse = config('customfield.response.success');
+        $this->errorResponse = config('customfield.response.error');
     }
 
     public function index(Request $request): JsonResponse
@@ -29,10 +34,9 @@ class CustomFieldController extends BaseController
 
         $fields = $this->service->getFieldsForTable($module, $userId);
 
-        return response()->json([
-            'data' => $fields,
-            'total' => count($fields)
-        ]);
+        $this->successResponse['data'] = $fields;
+
+        return response()->json($this->successResponse);
     }
 
     public function store(Request $request): JsonResponse
@@ -55,24 +59,22 @@ class CustomFieldController extends BaseController
         $success = $this->service->saveModuleFields($module, $fields);
 
         if ($success) {
-            return response()->json([
-                'message' => 'Custom fields saved successfully',
-                'data' => $this->service->getModuleFields($module)
-            ], 201);
+            $this->successResponse['message'] = 'Custom fields saved successfully';
+            $this->successResponse['data'] = $this->service->getModuleFields($module);
+
+            return response()->json($this->successResponse, 200);
         }
 
-        return response()->json(['error' => 'Failed to save custom fields'], 500);
+        $this->errorResponse['message'] = 'Failed to save custom fields';
+        return response()->json($this->errorResponse, 200);
     }
 
-    public function show(Request $request, string $module, string $key): JsonResponse
+    public function show(Request $request, string $module): JsonResponse
     {
-        $field = $this->service->getField($module, $key);
+        $fields = $this->service->getModuleFields($module);
 
-        if (!$field) {
-            return response()->json(['error' => 'Field not found'], 404);
-        }
-
-        return response()->json(['data' => $field]);
+        $this->successResponse['data'] = $fields;
+        return response()->json($this->successResponse, 200);
     }
 
     public function update(Request $request, string $module, string $key): JsonResponse
@@ -90,12 +92,12 @@ class CustomFieldController extends BaseController
 
         try {
             $field = $this->service->saveModuleField($module, $fieldData);
-            return response()->json([
-                'message' => 'Field updated successfully',
-                'data' => $field->toArray()
-            ]);
+            $this->successResponse['message'] = 'Field updated successfully';
+            $this->successResponse['data'] = $field->toArray();
+            return response()->json($this->successResponse, 200);
         } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 422);
+            $this->errorResponse['message'] = $e->getMessage();
+            return response()->json($this->errorResponse, 200);
         }
     }
 
@@ -104,10 +106,12 @@ class CustomFieldController extends BaseController
         $success = $this->service->deleteField($module, $key);
 
         if ($success) {
-            return response()->json(['message' => 'Field deleted successfully']);
+            $this->successResponse['message'] = 'Field deleted successfully';
+            return response()->json($this->successResponse, 200);
         }
 
-        return response()->json(['error' => 'Failed to delete field'], 500);
+        $this->errorResponse['message'] = 'Failed to delete field';
+        return response()->json($this->errorResponse, 200);
     }
 
     public function getUserSettings(Request $request): JsonResponse
@@ -122,7 +126,8 @@ class CustomFieldController extends BaseController
             $validated['user_id']
         );
 
-        return response()->json(['data' => $settings]);
+        $this->successResponse['data'] = $settings;
+        return response()->json($this->successResponse, 200);
     }
 
     public function saveUserSettings(Request $request): JsonResponse
@@ -144,10 +149,12 @@ class CustomFieldController extends BaseController
         );
 
         if ($success) {
-            return response()->json(['message' => 'User settings saved successfully']);
+            $this->successResponse['message'] = 'User settings saved successfully';
+            return response()->json($this->successResponse, 200);
         }
 
-        return response()->json(['error' => 'Failed to save user settings'], 500);
+        $this->errorResponse['message'] = 'Failed to save user settings';
+        return response()->json($this->errorResponse, 200);
     }
 
     public function getTemplates(Request $request): JsonResponse
@@ -162,7 +169,8 @@ class CustomFieldController extends BaseController
             $validated['user_id'] ?? null
         );
 
-        return response()->json(['data' => $templates]);
+        $this->successResponse['data'] = $templates;
+        return response()->json($this->successResponse, 200);
     }
 
     public function createTemplate(Request $request): JsonResponse
@@ -183,10 +191,14 @@ class CustomFieldController extends BaseController
             $validated['created_by'] ?? null
         );
 
-        return response()->json([
-            'message' => 'Template created successfully',
-            'data' => new CustomFieldTemplateResource($template)
-        ], 201);
+        if ($template) {
+            $this->successResponse['message'] = 'Template created successfully';
+            $this->successResponse['data'] = new CustomFieldTemplateResource($template);
+            return response()->json($this->successResponse, 200);
+        }
+
+        $this->errorResponse['message'] = 'Failed to create template';
+        return response()->json($this->errorResponse, 200);
     }
 
     public function applyTemplate(Request $request): JsonResponse
@@ -202,10 +214,12 @@ class CustomFieldController extends BaseController
         );
 
         if ($success) {
-            return response()->json(['message' => 'Template applied successfully']);
+            $this->successResponse['message'] = 'Template applied successfully';
+            return response()->json($this->successResponse, 200);
         }
 
-        return response()->json(['error' => 'Failed to apply template'], 500);
+        $this->errorResponse['message'] = 'Failed to apply template';
+        return response()->json($this->errorResponse, 200);
     }
 
     public function duplicateTemplate(Request $request): JsonResponse
@@ -223,13 +237,13 @@ class CustomFieldController extends BaseController
         );
 
         if ($template) {
-            return response()->json([
-                'message' => 'Template duplicated successfully',
-                'data' => new CustomFieldTemplateResource($template)
-            ]);
+            $this->successResponse['message'] = 'Template duplicated successfully';
+            $this->successResponse['data'] = new CustomFieldTemplateResource($template);
+            return response()->json($this->successResponse, 200);
         }
 
-        return response()->json(['error' => 'Failed to duplicate template'], 500);
+        $this->errorResponse['message'] = 'Failed to duplicate template';
+        return response()->json($this->errorResponse, 200);
     }
 
     public function deleteTemplate(int $templateId): JsonResponse
@@ -237,17 +251,20 @@ class CustomFieldController extends BaseController
         $success = $this->service->deleteTemplate($templateId);
 
         if ($success) {
-            return response()->json(['message' => 'Template deleted successfully']);
+            $this->successResponse['message'] = 'Template deleted successfully';
+            return response()->json($this->successResponse, 200);
         }
 
-        return response()->json(['error' => 'Failed to delete template'], 500);
+        $this->errorResponse['message'] = 'Failed to delete template';
+        return response()->json($this->errorResponse, 200);
     }
 
     public function getAvailableFieldTypes(): JsonResponse
     {
         $types = $this->service->getAvailableFieldTypes();
 
-        return response()->json(['data' => $types]);
+        $this->successResponse['data'] = $types;
+        return response()->json($this->successResponse, 200);
     }
 
     public function export(Request $request): JsonResponse
@@ -258,7 +275,8 @@ class CustomFieldController extends BaseController
 
         $data = $this->service->exportModuleFields($validated['module']);
 
-        return response()->json($data);
+        $this->successResponse['data'] = $data;
+        return response()->json($this->successResponse, 200);
     }
 
     public function import(Request $request): JsonResponse
@@ -272,9 +290,11 @@ class CustomFieldController extends BaseController
         $success = $this->service->importModuleFields($validated['data']);
 
         if ($success) {
-            return response()->json(['message' => 'Fields imported successfully']);
+            $this->successResponse['message'] = 'Fields imported successfully';
+            return response()->json($this->successResponse, 200);
         }
 
-        return response()->json(['error' => 'Failed to import fields'], 500);
+        $this->errorResponse['message'] = 'Failed to import fields';
+        return response()->json($this->errorResponse, 200);
     }
 }
