@@ -1,0 +1,39 @@
+{
+    "name": "qmrp/customfield",
+    "description": "Laravel custom field module - add custom display fields to models",
+    "type": "library",
+    "keywords": ["laravel", "custom-fields", "model", "fields"],
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Qmrp\\CustomField\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "zhigangzhou",
+            "email": "zhouzhigangqmrp@163.com"
+        }
+    ],
+    "require": {
+        "php": "^7.4|^8.0|^8.1|^8.2",
+        "illuminate/support": "^8.0|^9.0|^10.0|^11.0",
+        "illuminate/database": "^8.0|^9.0|^10.0|^11.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9.0|^10.0",
+        "orchestra/testbench": "^6.0|^7.0|^8.0|^9.0"
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Qmrp\\CustomField\\CustomFieldServiceProvider"
+            ],
+            "aliases": {
+                "CustomField": "Qmrp\\CustomField\\Facades\\CustomField"
+            }
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}
